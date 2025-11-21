@@ -1,48 +1,46 @@
 """
-Database Schemas
+Database Schemas for Student Learning Resource Platform
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model corresponds to a MongoDB collection.
+Collection name is the lowercase of the model class name.
 """
+from typing import List, Optional
+from pydantic import BaseModel, Field, HttpUrl
+from datetime import datetime
 
-from pydantic import BaseModel, Field
-from typing import Optional
-
-# Example schemas (replace with your own):
 
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
     name: str = Field(..., description="Full name")
     email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    avatar: Optional[str] = Field(None, description="Avatar image URL")
+    bio: Optional[str] = Field(None, description="Short bio")
+    createdAt: Optional[datetime] = Field(default=None, description="Creation timestamp")
 
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+class Studyasset(BaseModel):
+    title: str
+    description: Optional[str] = None
+    subject: Optional[str] = None
+    class_: Optional[str] = Field(default=None, alias="class", description="Class/Grade")
+    exam: Optional[str] = None
+    year: Optional[str] = None
+    file_url: str = Field(..., description="Public URL to the file")
+    thumbnail_url: Optional[str] = Field(default=None, description="Thumbnail image URL")
+    type: Optional[str] = Field(default=None, description="Type like notes, past_paper, mind_map, etc.")
+    uploader_id: Optional[str] = Field(default=None, description="User id of uploader")
+    likes: int = Field(default=0)
+    createdAt: Optional[datetime] = Field(default=None)
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+
+class Report(BaseModel):
+    asset_id: str
+    reporter_id: Optional[str] = None
+    reason: str
+    status: str = Field(default="open")
+    createdAt: Optional[datetime] = None
+
+
+class Like(BaseModel):
+    user_id: str
+    asset_id: str
+    createdAt: Optional[datetime] = None
